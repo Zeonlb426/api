@@ -17,28 +17,19 @@ exports.create = async (req, res) => {
 
     const { firstName, lastName, email, password } = req.body;
 
-    if (!(email && password && firstName && lastName)) {
-        return res.status(400).send("All input is required");
-    }
-
     const oldUser = await User.findOne({ where: {email} });
 
-    if (oldUser) {
-        return res.status(409).send("User Already Exist. Please Login");
-    }
+    if (oldUser) return res.status(409).json({"message": "Такой пользователь уже существует"});
 
-    //Encrypt user password
     let encryptedPassword = await bcrypt.hash(password, 5);
 
-    // Create user in our database
     const user = await User.create({
         firstName,
         lastName,
-        email: email.toLowerCase(), // sanitize: convert email to lowercase
+        email,
         password: encryptedPassword,
     });
 
-    // Create token
     const token = jwt.sign(
         { id: user.id, email },
         process.env.TOKEN_KEY,
