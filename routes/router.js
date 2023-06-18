@@ -9,34 +9,78 @@ const router = express.Router()
 router.get("/user", auth, userController.index);
 router.post("/logout", auth, userController.create);
 
-
 /**
- * @swagger
- * tags:
- *   name: User Authentification
- *   description: User Authentification managing API
- * /register:
- *   post:
- *     summary: Create a new user account
- *     tags: [User Authentification]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Register'
- *     responses:
- *       201:
- *         description: The created user account.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Register'
- *       500:
- *         description: Some server error
- *
- */
-router.post("/register", validationRequest.request, userController.create);
+* @swagger
+* tags:
+*   name: Auth
+*   description: API для регистрации, аутентификации и авторизации пользователя
+* /register:
+*   post:
+*     summary: Создание аккаунта пользователя в базе
+*     tags: [Auth]
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             $ref: '#/components/schemas/registerRequest'
+*     responses:
+*       201:
+*         description: Пользователь создан.
+*         content:
+*           application/json:
+*             schema:
+*               $ref: '#/components/schemas/userModel'
+*       400:
+*         description: Ошибка валидации данных.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 errors:
+*                   type: array
+*                   items:
+*                     type: object
+*                     properties:
+*                       type:
+*                         type: string
+*                         description: Тип поля
+*                       value:
+*                         type: string
+*                         description: Значение поля
+*                       msg:
+*                         type: string
+*                         description: Текст ошибки
+*                       path:
+*                         type: string
+*                         description: Имя поля с ошибкой
+*                       location:
+*                         type: string
+*                         description: Место, где произошла ошибка
+*                     example:
+*                       type: "field"
+*                       value: "1234577777"
+*                       msg: "Пароль должен быть не меньше 5 и не больше 8 символов"
+*                       path: "password"
+*                       location: "body"
+*       409:
+*         description: Пользователь с такими данными уже существует.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                   description: Текст ошибки
+*               example:
+*                 message: "Такой пользователь уже существует"
+*       500:
+*         description: Что-то пошло не так.. гы гы
+*
+*/
+router.post("/register", validationRequest.register, userController.create);
 router.post("/login", authController.login);
 
 router.get("/", userController.index);

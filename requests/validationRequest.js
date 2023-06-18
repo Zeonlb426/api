@@ -1,8 +1,43 @@
-const { body } = require('express-validator');
 const { validationResult, checkSchema } = require('express-validator');
-exports.request = async (req, res, next) => {
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     registerRequest:
+ *       type: object
+ *       required:
+ *         - firstName
+ *         - lastName
+ *         - email
+ *         - password
+ *       properties:
+ *         firstName:
+ *           type: string
+ *           maxLength: 30
+ *           description: Имя пользователя
+ *         lastName:
+ *           type: string
+ *           maxLength: 30
+ *           description: Фамилия пользователя
+ *         email:
+ *           type: string
+ *           maxLength: 100
+ *           description: Адрес почты
+ *         password:
+ *           type: string
+ *           minLength: 3
+ *           maxLength: 8
+ *           description: Пароль пользователя
+ *       example:
+ *         firstName: "Jone"
+ *         lastName: "Dou"
+ *         email: "example@mail.com"
+ *         password: "12345"
+ */
+exports.register = async (req, res, next) => {
     
-    const result = await checkSchema({
+    const schemaObject = checkSchema({
         firstName: {
             exists: {
                 errorMessage: 'Отсутствует параметр',
@@ -66,7 +101,9 @@ exports.request = async (req, res, next) => {
                 errorMessage: 'Пароль должен быть не меньше 5 и не больше 8 символов',
             }
         },
-    }).run(req);
+    });
+
+    await schemaObject.run(req);
 
     const errors = validationResult(req);
 

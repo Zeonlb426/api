@@ -13,41 +13,7 @@ exports.index = async (req, res) => {
     );
 };
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     Register:
- *       type: object
- *       required:
- *         - firstName
- *         - lastName
- *         - email
- *         - password
- *       properties:
- *         firstName:
- *           type: string
- *           maxLength: 30
- *           description: Имя пользователя
- *         lastName:
- *           type: string
- *           maxLength: 30
- *           description: Фамилия пользователя
- *         email:
- *           type: string
- *           maxLength: 100
- *           description: Адрес почты
- *         password:
- *           type: string
- *           minLength: 3
- *           maxLength: 8
- *           description: Пароль пользователя
- *       example:
- *         firstName: "Jone"
- *         lastName: "Dou"
- *         email: "example@mail.com"
- *         password: "12345"
- */
+
 exports.create = async (req, res) => {
 
     const { firstName, lastName, email, password } = req.body;
