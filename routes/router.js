@@ -16,7 +16,7 @@ router.post("/logout", auth, userController.create);
 *   description: API для регистрации, аутентификации и авторизации пользователя
 * /register:
 *   post:
-*     summary: Создание аккаунта пользователя в базе
+*     summary: Начало процедуры создания пользователя, проверка данных и отправка письма с подтверждением
 *     tags: [Auth]
 *     requestBody:
 *       required: true
@@ -80,7 +80,33 @@ router.post("/logout", auth, userController.create);
 *         description: Что-то пошло не так.. гы гы
 *
 */
-router.post("/register", validationRequest.register, userController.create);
+router.post("/register", validationRequest.register, userController.register);
+
+/**
+* @swagger
+* /confirm:
+*   get:
+*     summary: Завершение процедуры создания пользователя, запись данных в базу
+*     tags: [Auth]
+*     parameters:
+*       - in: query
+*         name: tkey
+*         type: string
+*         required: true
+*         description: Токен из письма подтверждения процедуры регистрации, время жизни 15 мин
+*     responses:
+*       201:
+*         description: Пользователь создан.
+*         content:
+*           application/json:
+*             schema:
+*               $ref: '#/components/schemas/userModel'
+*       500:
+*         description: Что-то пошло не так.. гы гы
+*
+*/
+router.get("/confirm", validationRequest.confirm, userController.create);
+
 router.post("/login", authController.login);
 
 router.get("/", userController.index);
