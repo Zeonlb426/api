@@ -38,9 +38,6 @@ const { Model } = require('sequelize');
  *         status:
  *           type: boolean
  *           description: Статус записи пользователя
- *         verifyEmail:
- *           type: boolean
- *           description: Статус проверки почты пользователя
  *         createdAt:
  *           type: string
  *           description: Дата создания записи
@@ -56,7 +53,6 @@ const { Model } = require('sequelize');
  *         token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiZW1haWwiOiJwb2to"
  *         avatar: "https://example.com/image.jpg"
  *         status: true
- *         verifyEmail: false
  *         updatedAt: "2023-06-18T16:22:32.561Z"
  *         createdAt: "2023-06-18T16:22:32.422Z"
  */
@@ -106,10 +102,6 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.BOOLEAN,
             defaultValue: true,
         },
-        verifyEmail: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false,
-        }
     }, {
         sequelize,
         modelName: 'User',

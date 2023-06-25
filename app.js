@@ -29,7 +29,7 @@ const options = {
             },
         ],
     },
-    apis: ["./routes/*.js", "./controllers/*.js", "./requests/*.js", "./models/*.js"],
+    apis: ["./routes/*.js", "./controllers/*.js", "./middlewares/*.js", "./models/*.js"],
 };
 const specification = swaggerJsdoc(options);
 

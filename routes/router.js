@@ -1,13 +1,10 @@
 const express = require('express')
-const userController = require('../controllers/userController')
 const authController = require('../controllers/authController')
+const validationRequest = require('../middlewares/validationRequest');
+const hasUser = require('../middlewares/hasUser')
 const auth = require("../middlewares/auth");
-const validationRequest = require('../requests/validationRequest');
 
 const router = express.Router()
-
-router.get("/user", auth, userController.index);
-router.post("/logout", auth, userController.create);
 
 /**
 * @swagger
@@ -76,11 +73,23 @@ router.post("/logout", auth, userController.create);
 *                   description: Текст ошибки
 *               example:
 *                 message: "Такой пользователь уже существует"
+*       418:
+*         description: Ошибка отправки письма.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                   description: Текст ошибки
+*               example:
+*                 message: "Ошибка отправки письма"
 *       500:
 *         description: Что-то пошло не так.. гы гы
 *
 */
-router.post("/register", validationRequest.register, userController.register);
+router.post("/register", validationRequest.register, hasUser.check, authController.register);
 
 /**
 * @swagger
@@ -93,7 +102,7 @@ router.post("/register", validationRequest.register, userController.register);
 *         name: tkey
 *         type: string
 *         required: true
-*         description: Токен из письма подтверждения процедуры регистрации, время жизни 15 мин
+*         description: Токен из письма подтверждения процедуры регистрации, время жизни 10 мин
 *     responses:
 *       201:
 *         description: Пользователь создан.
@@ -101,14 +110,108 @@ router.post("/register", validationRequest.register, userController.register);
 *           application/json:
 *             schema:
 *               $ref: '#/components/schemas/userModel'
+*       401:
+*         description: Не верный токен в параметре запроса.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                   description: Текст ошибки
+*               example:
+*                 message: "Не верный токен"
+*       409:
+*         description: Пользователь с такими данными уже существует.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                   description: Текст ошибки
+*               example:
+*                 message: "Такой пользователь уже существует"
 *       500:
 *         description: Что-то пошло не так.. гы гы
 *
 */
-router.get("/confirm", validationRequest.confirm, userController.create);
+router.get("/confirm", validationRequest.confirm, hasUser.check, authController.confirm);
 
-router.post("/login", authController.login);
+/**
+* @swagger
+* /login:
+*   post:
+*     summary: Вход пользователя в свою учетную запись
+*     tags: [Auth]
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             $ref: '#/components/schemas/loginRequest'
+*     responses:
+*       200:
+*         description: Пользователь залогинен.
+*         content:
+*           application/json:
+*             schema:
+*               $ref: '#/components/schemas/userModel'
+*       400:
+*         description: Ошибка валидации данных.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 errors:
+*                   type: array
+*                   items:
+*                     type: object
+*                     properties:
+*                       type:
+*                         type: string
+*                         description: Тип поля
+*                       value:
+*                         type: string
+*                         description: Значение поля
+*                       msg:
+*                         type: string
+*                         description: Текст ошибки
+*                       path:
+*                         type: string
+*                         description: Имя поля с ошибкой
+*                       location:
+*                         type: string
+*                         description: Место, где произошла ошибка
+*                     example:
+*                       type: "field"
+*                       value: "1234577777"
+*                       msg: "Пароль должен быть не меньше 5 и не больше 8 символов"
+*                       path: "password"
+*                       location: "body"
+*       401:
+*         description: Логин или пароль указан не верно.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                   description: Текст ошибки
+*               example:
+*                 message: "Логин или пароль указан не верно"
+*       500:
+*         description: Что-то пошло не так.. гы гы
+*
+*/
+router.post("/login", validationRequest.login, authController.login);
 
-router.get("/", userController.index);
+// router.post("/logout", auth, userController.create);
+
+// router.get("/user", auth, userController.index);
 
 module.exports = router
