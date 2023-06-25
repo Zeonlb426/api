@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const mailConfirmTemplate = require("../templates/mailConfirmTemplate");
 const sendMail = require("../services/mailer");
 const User = require("../models").User;
+const BlackList = require("../models").BlackList;
 
 exports.register = async (req, res) => {
 
@@ -101,6 +102,18 @@ exports.login = async (req, res) => {
 
     return res.status(401).send("Логин или пароль указан не верно");
 
+};
+
+exports.logout = async (req, res) => {
+
+    const { id, token } = req.body;
+
+    const ban = await BlackList.create({ 
+        userId: id,
+        token: token
+     });
+
+    return res.status(200).json({"message": "Выполнено успешно"});
 };
 
 // exports.update = async (req, res) => {

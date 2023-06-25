@@ -23,6 +23,18 @@ const options = {
                 email: "dev@email.com",
             },
         },
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                }
+            }
+        },
+        // security: [{
+        //     bearerAuth: []
+        // }],
         servers: [
             {
             url: "https://instagram.lern.dev/api/v1/",

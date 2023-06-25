@@ -1,6 +1,6 @@
 const User = require("../models").User;
 
-exports.check = async (req, res, next) => {
+const checkHasUser = async (req, res, next) => {
 
     const hasUser = await User.findOne({ where: { email: req.body.email } });
 
@@ -9,3 +9,4 @@ exports.check = async (req, res, next) => {
     return next();
 }
 
+module.exports = checkHasUser;
