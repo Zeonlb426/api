@@ -23,18 +23,16 @@ const BlackList = require("../models").BlackList;
 *          message: "Токен обязателен для авторизации"
  */
 const verifyToken = async (req, res, next) => {
-    const bearerHeader = req.body.token || req.query.token || req.headers["authorization"];
+    const token = req.body.token || req.query.token || req.headers["authorization"];
 
-    if (!bearerHeader) {
+    if (!token) {
         return res.status(403).send("Токен обязателен для авторизации");
     }
-
-    const token = bearerHeader.split(' ')[1];
 
     try {
         req.body = await jwt.verify(token, process.env.TOKEN_KEY);
 
-        const ban = await BlackList.findOne({ where: { token } });
+        const ban = await BlackList.findOne({ where: { id: req.body.tokenId } });
 
         if (ban) throw new Error();
 

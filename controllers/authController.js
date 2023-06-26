@@ -1,6 +1,7 @@
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require('uuid');
 
 const mailConfirmTemplate = require("../templates/mailConfirmTemplate");
 const sendMail = require("../services/mailer");
@@ -55,13 +56,16 @@ exports.confirm = async (req, res) => {
         password
     });
 
+    const tokenId = uuidv4();
+
     const token = jwt.sign(
         {
             id: user.id,
             firstName,
             lastName,
             email,
-            avatar: user.avatar
+            avatar: user.avatar,
+            tokenId
         },
         process.env.TOKEN_KEY,
         {
@@ -82,13 +86,16 @@ exports.login = async (req, res) => {
 
     if (user && (await bcrypt.compare(password, user.password))) {
 
+        const tokenId = uuidv4();
+
         const token = jwt.sign(
             {
                 id: user.id,
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
-                avatar: user.avatar
+                avatar: user.avatar,
+                tokenId
             },
             process.env.TOKEN_KEY,
             {
@@ -106,11 +113,13 @@ exports.login = async (req, res) => {
 
 exports.logout = async (req, res) => {
 
-    const { id, token } = req.body;
+    const { id, tokenId, token } = req.body;
+    const header = await jwt.decode(token);
 
-    const ban = await BlackList.create({ 
+    const ban = await BlackList.create({
+        id: tokenId,
         userId: id,
-        token: token
+        timeLive: header.exp
      });
 
     return res.status(200).json({"message": "Выполнено успешно"});

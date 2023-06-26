@@ -16,9 +16,8 @@ module.exports = (sequelize, DataTypes) => {
     BlackList.init({
         id: {
             allowNull: false,
-            autoIncrement: true,
             primaryKey: true,
-            type: DataTypes.INTEGER
+            type: DataTypes.UUID
         },
         userId: {
             allowNull: false,
@@ -26,9 +25,12 @@ module.exports = (sequelize, DataTypes) => {
             references: {
                 model: 'User',
                 key: 'id'
-            }
+            },
         },
-        token: DataTypes.STRING(512)
+        timeLive: {
+            allowNull: false,
+            type: DataTypes.INTEGER
+        }
     }, {
         sequelize,
         timestamps: true,

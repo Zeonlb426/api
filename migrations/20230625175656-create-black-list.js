@@ -5,9 +5,8 @@ module.exports = {
         await queryInterface.createTable('BlackLists', {
             id: {
                 allowNull: false,
-                autoIncrement: true,
                 primaryKey: true,
-                type: Sequelize.INTEGER
+                type: Sequelize.UUID
             },
             userId: {
                 type: Sequelize.INTEGER,
@@ -19,9 +18,9 @@ module.exports = {
                 },
                 allowNull: false
             },
-            token: {
-                type: Sequelize.STRING(512),
+            timeLive: {
                 allowNull: false,
+                type: Sequelize.INTEGER
             },
             createdAt: {
                 allowNull: false,
