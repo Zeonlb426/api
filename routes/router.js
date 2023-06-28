@@ -217,7 +217,7 @@ router.post("/login", validationRequest.login, authController.login);
 *     summary: Выход пользователя из учетной записи
 *     tags: [Auth]
 *     security:
-*       - bearerAuth: []
+*       - apiKeyAuth: []
 *     description: В Header authorization должен быть указан токен
 *     responses:
 *       200:

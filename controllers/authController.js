@@ -8,6 +8,7 @@ const sendMail = require("../services/mailer");
 const User = require("../models").User;
 const BlackList = require("../models").BlackList;
 
+// Получение данных для регистрации, отправка письма для подтверждения
 exports.register = async (req, res) => {
 
     let { firstName, lastName, email, password } = req.body;
@@ -45,6 +46,7 @@ exports.register = async (req, res) => {
     return res.status(200).json({ "message": "Письмо отправлено" });
 };
 
+// Регистрация пользователя после подтверждения из письма
 exports.confirm = async (req, res) => {
 
     const { firstName, lastName, email, password } = req.body;
@@ -78,6 +80,7 @@ exports.confirm = async (req, res) => {
     return res.status(201).json(user);
 };
 
+// Вход в систему
 exports.login = async (req, res) => {
 
     const { email, password } = req.body;
@@ -107,10 +110,10 @@ exports.login = async (req, res) => {
         return res.status(200).json(user);
     }
 
-    return res.status(401).send("Логин или пароль указан не верно");
-
+    return res.status(401).json({"message":"Логин или пароль указан не верно"});
 };
 
+// Выход из системы
 exports.logout = async (req, res) => {
 
     const { id, tokenId, token } = req.body;

@@ -10,7 +10,7 @@ const BlackList = require("../models").BlackList;
 *        properties:
 *          message:
 *            type: string
-*            description: Не верный токен
+*            description: Токен не прошел проверку
 *        example:
 *          message: "Не верный токен"
  *     verifyTokenExist:
@@ -18,15 +18,15 @@ const BlackList = require("../models").BlackList;
 *        properties:
 *          message:
 *            type: string
-*            description: Токен обязателен для авторизации
+*            description: Токен обязателен в заголовке запроса
 *        example:
-*          message: "Токен обязателен для авторизации"
+*          message: "Токен не обнаружен"
  */
 const verifyToken = async (req, res, next) => {
     const token = req.body.token || req.query.token || req.headers["authorization"];
 
     if (!token) {
-        return res.status(403).send("Токен обязателен для авторизации");
+        return res.status(403).json({"message":"Токен не обнаружен"});
     }
 
     try {
@@ -39,9 +39,10 @@ const verifyToken = async (req, res, next) => {
         req.body.token = token;
 
     } catch (err) {
-        
-        return res.status(401).send("Не верный токен");
+
+        return res.status(401).json({"message":"Не верный токен"});
     }
+
     return next();
 };
 

@@ -25,15 +25,23 @@ const options = {
         },
         components: {
             securitySchemes: {
-                bearerAuth: {
-                    type: 'http',
-                    scheme: 'bearer',
-                    bearerFormat: 'JWT',
+                // Для использования как bearer token
+                // bearerAuth: {
+                //     type: 'http',
+                //     scheme: 'bearer',
+                //     bearerFormat: 'JWT',
+                // },
+
+                // Для использования как API Key
+                apiKeyAuth: {
+                    type: 'apiKey',
+                    in: 'header',
+                    name: 'authorization'
                 }
             }
         },
         // security: [{
-        //     bearerAuth: []
+        //     apiKeyAuth: []
         // }],
         servers: [
             {
