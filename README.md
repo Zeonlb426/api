@@ -48,7 +48,7 @@ npm run dev
 
 - Создание модели и файла миграции:
 ```
-npx sequelize-cli model:generate --name ModelName --attributes fieldName1:integer,fieldName2:string, fieldName3:boolean
+npx sequelize-cli model:generate --name ModelName --attributes fieldName1:integer, fieldName2:string, fieldName3:boolean
 ```
 
 - Создание сидера:

@@ -1,7 +1,7 @@
 const express = require('express')
 const authController = require('../controllers/authController')
 const validationRequest = require('../middlewares/validationRequest');
-const hasUser = require('../middlewares/hasUser')
+const checkHasUser = require('../middlewares/checkHasUser')
 const auth = require("../middlewares/auth");
 
 const router = express.Router()
@@ -89,7 +89,7 @@ const router = express.Router()
 *         description: Что-то пошло не так.. гы гы
 *
 */
-router.post("/register", validationRequest.register, hasUser.check, authController.register);
+router.post("/register", validationRequest.register, checkHasUser, authController.register);
 
 /**
 * @swagger
@@ -138,7 +138,7 @@ router.post("/register", validationRequest.register, hasUser.check, authControll
 *         description: Что-то пошло не так.. гы гы
 *
 */
-router.get("/confirm", validationRequest.confirm, hasUser.check, authController.confirm);
+router.get("/confirm", validationRequest.confirm, checkHasUser, authController.confirm);
 
 /**
 * @swagger
@@ -210,7 +210,42 @@ router.get("/confirm", validationRequest.confirm, hasUser.check, authController.
 */
 router.post("/login", validationRequest.login, authController.login);
 
-// router.post("/logout", auth, userController.create);
+/**
+* @swagger
+* /logout:
+*   get:
+*     summary: Выход пользователя из учетной записи
+*     tags: [Auth]
+*     security:
+*       - apiKeyAuth: []
+*     description: В Header authorization должен быть указан токен
+*     responses:
+*       200:
+*         description: Успешная операция выхода из учетной записи
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                   description: Пользователь вылогинился успешно
+*               example:
+*                 message: "Выполнено успешно"
+*       401:
+*         description: Токен не действительный.
+*         content:
+*           application/json:
+*             schema:
+*               $ref: '#/components/schemas/verifyTokenFailed'
+*       403:
+*         description: Токен обязателен.
+*         content:
+*           application/json:
+*             schema:
+*               $ref: '#/components/schemas/verifyTokenExist'
+*/
+router.get("/logout", auth, authController.logout);
 
 // router.get("/user", auth, userController.index);
 

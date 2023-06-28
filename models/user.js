@@ -1,5 +1,6 @@
 'use strict';
 const { Model } = require('sequelize');
+const BlackList = require('./blacklist');
 /**
  * @swagger
  * components:
@@ -106,7 +107,10 @@ module.exports = (sequelize, DataTypes) => {
         sequelize,
         modelName: 'User',
         timestamps: true,
+        associate: (models) => {
+            User.hasMany(models.BlackList, { foreignKey: 'userId'});
+        }
     });
-    
+
     return User;
 };

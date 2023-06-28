@@ -1,11 +1,14 @@
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require('uuid');
 
 const mailConfirmTemplate = require("../templates/mailConfirmTemplate");
 const sendMail = require("../services/mailer");
 const User = require("../models").User;
+const BlackList = require("../models").BlackList;
 
+// Получение данных для регистрации, отправка письма для подтверждения
 exports.register = async (req, res) => {
 
     let { firstName, lastName, email, password } = req.body;
@@ -43,6 +46,7 @@ exports.register = async (req, res) => {
     return res.status(200).json({ "message": "Письмо отправлено" });
 };
 
+// Регистрация пользователя после подтверждения из письма
 exports.confirm = async (req, res) => {
 
     const { firstName, lastName, email, password } = req.body;
@@ -54,13 +58,16 @@ exports.confirm = async (req, res) => {
         password
     });
 
+    const tokenId = uuidv4();
+
     const token = jwt.sign(
         {
             id: user.id,
             firstName,
             lastName,
             email,
-            avatar: user.avatar
+            avatar: user.avatar,
+            tokenId
         },
         process.env.TOKEN_KEY,
         {
@@ -73,6 +80,7 @@ exports.confirm = async (req, res) => {
     return res.status(201).json(user);
 };
 
+// Вход в систему
 exports.login = async (req, res) => {
 
     const { email, password } = req.body;
@@ -81,13 +89,16 @@ exports.login = async (req, res) => {
 
     if (user && (await bcrypt.compare(password, user.password))) {
 
+        const tokenId = uuidv4();
+
         const token = jwt.sign(
             {
                 id: user.id,
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
-                avatar: user.avatar
+                avatar: user.avatar,
+                tokenId
             },
             process.env.TOKEN_KEY,
             {
@@ -99,8 +110,22 @@ exports.login = async (req, res) => {
         return res.status(200).json(user);
     }
 
-    return res.status(401).send("Логин или пароль указан не верно");
+    return res.status(401).json({"message":"Логин или пароль указан не верно"});
+};
 
+// Выход из системы
+exports.logout = async (req, res) => {
+
+    const { id, tokenId, token } = req.body;
+    const header = await jwt.decode(token);
+
+    const ban = await BlackList.create({
+        id: tokenId,
+        userId: id,
+        timeLive: header.exp
+     });
+
+    return res.status(200).json({"message": "Выполнено успешно"});
 };
 
 // exports.update = async (req, res) => {
