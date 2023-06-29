@@ -23,6 +23,7 @@ const BlackList = require("../models").BlackList;
 *          message: "Токен не обнаружен"
  */
 const verifyToken = async (req, res, next) => {
+
     const token = req.body.token || req.query.token || req.headers["authorization"];
 
     if (!token) {
@@ -30,13 +31,11 @@ const verifyToken = async (req, res, next) => {
     }
 
     try {
-        req.body = await jwt.verify(token, process.env.TOKEN_KEY);
+        req.body.user = await jwt.verify(token, process.env.TOKEN_KEY);
 
-        const ban = await BlackList.findOne({ where: { id: req.body.tokenId } });
+        const ban = await BlackList.findOne({ where: { id: req.body.user.tokenId } });
 
         if (ban) throw new Error();
-
-        req.body.token = token;
 
     } catch (err) {
 

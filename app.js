@@ -1,5 +1,6 @@
 const express = require("express");
 const router = require("./routes/router");
+// const multer = require('multer');
 // Документация API
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
@@ -54,6 +55,9 @@ const options = {
 const specification = swaggerJsdoc(options);
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+// app.use(express.multer());
+
 app.use('/v1/', router)
 
 app.use( '/v1/documentation', swaggerUi.serve, swaggerUi.setup(specification) );

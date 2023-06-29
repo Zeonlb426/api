@@ -1,5 +1,6 @@
 const express = require('express')
 const authController = require('../controllers/authController')
+const userController = require('../controllers/userController')
 const validationRequest = require('../middlewares/validationRequest');
 const checkHasUser = require('../middlewares/checkHasUser')
 const auth = require("../middlewares/auth");
@@ -22,12 +23,18 @@ const router = express.Router()
 *           schema:
 *             $ref: '#/components/schemas/registerRequest'
 *     responses:
-*       201:
-*         description: Пользователь создан.
+*       200:
+*         description: Письмо отправлено.
 *         content:
 *           application/json:
 *             schema:
-*               $ref: '#/components/schemas/userModel'
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                   description: Письмо отправлено
+*               example:
+*                 message: "Письмо отправлено"
 *       400:
 *         description: Ошибка валидации данных.
 *         content:
@@ -247,6 +254,137 @@ router.post("/login", validationRequest.login, authController.login);
 */
 router.get("/logout", auth, authController.logout);
 
-// router.get("/user", auth, userController.index);
+/**
+* @swagger
+* /forgot:
+*   post:
+*     summary: Восстановление забытого пароля
+*     tags: [Auth]
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             $ref: '#/components/schemas/forgotRequest'
+*     responses:
+*       200:
+*         description: Письмо для смены пароля отправлено.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                   description: Письмо отправлено
+*       400:
+*         description: Ошибка валидации данных.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 errors:
+*                   type: array
+*                   items:
+*                     type: object
+*                     properties:
+*                       type:
+*                         type: string
+*                         description: Тип поля
+*                       value:
+*                         type: string
+*                         description: Значение поля
+*                       msg:
+*                         type: string
+*                         description: Текст ошибки
+*                       path:
+*                         type: string
+*                         description: Имя поля с ошибкой
+*                       location:
+*                         type: string
+*                         description: Место, где произошла ошибка
+*                     example:
+*                       type: "field"
+*                       value: "example@email.com"
+*                       msg: "Адрес электронной почты не корректный"
+*                       path: "email"
+*                       location: "body"
+*       401:
+*         description: Пользователь с таким почтовым адресом не найден.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                   description: Текст ошибки
+*               example:
+*                 message: "Пользователь с таким почтовым адресом не найден"
+*       418:
+*         description: Ошибка отправки письма.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                   description: Текст ошибки
+*               example:
+*                 message: "Ошибка отправки письма"
+*       500:
+*         description: Сервер здох.. гы гы
+*
+*/
+router.post("/forgot", validationRequest.forgot, authController.forgot);
+
+/**
+* @swagger
+* /changepassword:
+*   post:
+*     summary: Завершение процедуры смены пароля
+*     tags: [Auth]
+*     security:
+*       - apiKeyAuth: []
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             $ref: '#/components/schemas/changePasswordRequest'
+*     responses:
+*       201:
+*         description: Ответ при удачной смене пароля.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                   description: Пароль изменён
+*               example:
+*                 message: "Пароль изменён"
+*       401:
+*         description: Токен не действительный.
+*         content:
+*           application/json:
+*             schema:
+*               $ref: '#/components/schemas/verifyTokenFailed'
+*       403:
+*         description: Токен обязателен.
+*         content:
+*           application/json:
+*             schema:
+*               $ref: '#/components/schemas/verifyTokenExist'
+*       500:
+*         description: Что-то пошло не так.. гы гы
+*
+*/
+router.post("/changepassword", auth, validationRequest.changepassword, authController.changepassword);
+
+router.patch("/update", auth, userController.update);
 
 module.exports = router
