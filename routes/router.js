@@ -4,6 +4,7 @@ const userController = require('../controllers/userController')
 const validationRequest = require('../middlewares/validationRequest');
 const checkHasUser = require('../middlewares/checkHasUser')
 const auth = require("../middlewares/auth");
+const uploadImage = require('../middlewares/uploadImage');
 
 const router = express.Router()
 
@@ -385,6 +386,97 @@ router.post("/forgot", validationRequest.forgot, authController.forgot);
 */
 router.post("/changepassword", auth, validationRequest.changepassword, authController.changepassword);
 
+/**
+* @swagger
+* tags:
+*   name: User
+*   description: Работа с данными пользователя
+* /update:
+*   patch:
+*     summary: Обновление данных пользователя
+*     tags: [User]
+*     security:
+*       - apiKeyAuth: []
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             $ref: '#/components/schemas/changePasswordRequest'
+*     responses:
+*       200:
+*         description: Ответ при удачной смене данных.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                   description: Пароль изменён
+*               example:
+*                 message: "Пароль изменён"
+*       401:
+*         description: Токен не действительный.
+*         content:
+*           application/json:
+*             schema:
+*               $ref: '#/components/schemas/verifyTokenFailed'
+*       403:
+*         description: Токен обязателен.
+*         content:
+*           application/json:
+*             schema:
+*               $ref: '#/components/schemas/verifyTokenExist'
+*       500:
+*         description: Что-то пошло не так.. гы гы
+*
+*/
 router.patch("/update", auth, userController.update);
+
+/**
+* @swagger
+* /avatar:
+*   post:
+*     summary: Завершение процедуры смены пароля
+*     tags: [User]
+*     security:
+*       - apiKeyAuth: []
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             $ref: '#/components/schemas/changePasswordRequest'
+*     responses:
+*       201:
+*         description: Ответ при удачной смене пароля.
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                   description: Пароль изменён
+*               example:
+*                 message: "Пароль изменён"
+*       401:
+*         description: Токен не действительный.
+*         content:
+*           application/json:
+*             schema:
+*               $ref: '#/components/schemas/verifyTokenFailed'
+*       403:
+*         description: Токен обязателен.
+*         content:
+*           application/json:
+*             schema:
+*               $ref: '#/components/schemas/verifyTokenExist'
+*       500:
+*         description: Что-то пошло не так.. гы гы
+*
+*/
+router.post("/avatar", auth, uploadImage.single("image"), userController.avatar);
 
 module.exports = router

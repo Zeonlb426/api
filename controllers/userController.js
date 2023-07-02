@@ -9,36 +9,33 @@ const User = require("../models").User;
 const BlackList = require("../models").BlackList;
 
 
+
+
+
 exports.update = async (req, res) => {
     console.log(req.body);
-    // const { email, password } = req.body;
 
-    // const user = await User.findOne({ where: { email } });
+    return res.status(401).json({"message":"update"});
+};
 
-    // if (user && (await bcrypt.compare(password, user.password))) {
+exports.avatar = async (req, res) => {
 
-    //     const tokenId = uuidv4();
+    /* 
+        req.file = { 
+            fieldname, originalname, 
+            mimetype, size, bucket, key, location
+        }
+    */
+    console.log(`req.files ->> `, req.file);
+    // location key in req.file holds the s3 url for the image
+    let data = {}
+    if(req.file) {
+        data.image = req.file.location
+    }
 
-    //     const token = jwt.sign(
-    //         {
-    //             id: user.id,
-    //             firstName: user.firstName,
-    //             lastName: user.lastName,
-    //             email: user.email,
-    //             avatar: user.avatar,
-    //             tokenId
-    //         },
-    //         process.env.TOKEN_KEY,
-    //         {
-    //             expiresIn: "60d",
-    //         }
-    //     );
-    //     user.token = token;
+    // HERE IS YOUR LOGIC TO UPDATE THE DATA IN DATABASE
 
-    //     return res.status(200).json(user);
-    // }
-
-    return res.status(401).json({"message":"Логин или пароль указан не верно"});
+    return res.status(401).json({"message":"avatar"});
 };
 
 
