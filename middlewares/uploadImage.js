@@ -1,18 +1,9 @@
 const multer = require("multer");
 const multerS3 = require("multer-s3");
-// const AWS = require("aws-sdk");
+const { v4: uuidv4 } = require('uuid');
+
 const path = require('path');
 const { S3 } = require("@aws-sdk/client-s3");
-// var minio = require("minio");
-
-// var minioClient = new minio.Client({
-//     endPoint: process.env.MINIO_HOST,
-//     port: 9000,
-//     useSSL: false,
-//     accessKey: process.env.MINIO_ACCESS_KEY,
-//     secretKey: process.env.MINIO_SECRET_KEY,
-// });
-
 
 const s3 = new S3({
     endpoint: process.env.AWS_HOST,
@@ -27,14 +18,14 @@ const s3 = new S3({
 
 const s3Storage = multerS3({
     s3: s3,
-    bucket: "instagram",
+    bucket: process.env.AWS_BUCKET,
     contentType: multerS3.AUTO_CONTENT_TYPE,
     acl: 'public-read',
     metadata: (req, file, cb) => {
         cb(null, { fieldname: file.fieldname })
     },
     key: (req, file, cb) => {
-        const fileName = 'uploads/user/' + Date.now() + "_" + file.fieldname + "_" + file.originalname;
+        const fileName = `${req.user.id}/${file.fieldname}/` + uuidv4() + path.extname(file.originalname.toLowerCase());
         cb(null, fileName);
     }
 });

@@ -477,6 +477,8 @@ router.patch("/update", auth, userController.update);
 *         description: Что-то пошло не так.. гы гы
 *
 */
-router.post("/avatar", auth, uploadImage.single("image"), userController.avatar);
+router.post("/avatar", auth, uploadImage.single("avatar"), userController.avatar);
+
+// router.post("/avatar", auth, uploadImage, userController.avatar);
 
 module.exports = router
