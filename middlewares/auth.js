@@ -12,7 +12,7 @@ const BlackList = require("../models").BlackList;
 *            type: string
 *            description: Токен не прошел проверку
 *        example:
-*          message: "Не верный токен"
+*          message: "Доступ запрещен"
  *     verifyTokenExist:
 *        type: object
 *        properties:
@@ -24,22 +24,23 @@ const BlackList = require("../models").BlackList;
  */
 const verifyToken = async (req, res, next) => {
 
-    const token = req.body.token || req.query.token || req.headers["authorization"];
+    const token = req.headers["authorization"];
 
     if (!token) {
         return res.status(403).json({"message":"Токен не обнаружен"});
     }
 
     try {
-        req.body.user = await jwt.verify(token, process.env.TOKEN_KEY);
 
-        const ban = await BlackList.findOne({ where: { id: req.body.user.tokenId } });
+        req.user = await jwt.verify(token, process.env.TOKEN_KEY);
+
+        const ban = await BlackList.findOne({ where: { id: req.user.tokenId } });
 
         if (ban) throw new Error();
 
     } catch (err) {
 
-        return res.status(401).json({"message":"Не верный токен"});
+        return res.status(401).json({"message":"Доступ запрещен"});
     }
 
     return next();
