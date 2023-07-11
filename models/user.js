@@ -1,6 +1,7 @@
 'use strict';
 const { Model } = require('sequelize');
 const BlackList = require('./blacklist');
+const Profile = require('./profile');
 /**
  * @swagger
  * components:
@@ -109,6 +110,7 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: true,
         associate: (models) => {
             User.hasMany(models.BlackList, { foreignKey: 'userId'});
+            User.hasOne(models.Profile, { foreignKey: 'userId'});
         }
     });
 

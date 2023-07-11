@@ -9,11 +9,12 @@ const User = require("../models").User;
 const BlackList = require("../models").BlackList;
 const Media = require("../models").Media;
 
-// exports.update = async (req, res) => {
-//     console.log(req.body);
+exports.update = async (req, res) => {
+    
+    console.log(req.body);
 
-//     return res.status(401).json({"message":"update"});
-// };
+    return res.status(200).json({"message":"update"});
+};
 
 
 exports.avatar = async (req, res) => {
@@ -35,3 +36,12 @@ exports.avatar = async (req, res) => {
 };
 
 
+exports.profile = async (req, res) => {
+
+    return res.status(200).json({
+        firstName: req.user.firstName,
+        lastName: req.user.lastName,
+        email: req.user.email,
+        avatar: req.user.avatar
+    });
+};

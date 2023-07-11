@@ -1,12 +1,11 @@
-const express = require('express')
-const authController = require('../controllers/authController')
-const userController = require('../controllers/userController')
+const express = require('express');
+const authController = require('../controllers/authController');
+const userController = require('../controllers/userController');
 const validationRequest = require('../middlewares/validationRequest');
-const checkHasUser = require('../middlewares/checkHasUser')
+const checkHasUser = require('../middlewares/checkHasUser');
 const auth = require("../middlewares/auth");
 const uploadImage = require('../middlewares/uploadImage');
-
-const router = express.Router()
+const router = express.Router();
 
 /**
 * @swagger
@@ -432,7 +431,7 @@ router.post("/changepassword", auth, validationRequest.changepassword, authContr
 *         description: Что-то пошло не так.. гы гы
 *
 */
-// router.patch("/update", auth, userController.update);
+router.post("/user/update", auth, validationRequest.update, userController.update);
 
 /**
 * @swagger
@@ -479,6 +478,10 @@ router.post("/changepassword", auth, validationRequest.changepassword, authContr
 */
 router.post("/avatar", auth, uploadImage.single("avatar"), userController.avatar);
 
+router.get("/profile", auth, userController.profile);
+
+
 // router.post("/avatar", auth, uploadImage, userController.avatar);
 
 module.exports = router
+ 

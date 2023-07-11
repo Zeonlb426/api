@@ -278,3 +278,9 @@ exports.changepassword = async (req, res, next) => {
 
     return res.status(400).json({ errors: errors.array() });
 }
+
+exports.update = async (req, res, next) => {
+
+   
+    
+}
