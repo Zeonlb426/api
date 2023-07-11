@@ -7,35 +7,31 @@ const mailConfirmTemplate = require("../templates/mailConfirmTemplate");
 const sendMail = require("../services/mailer");
 const User = require("../models").User;
 const BlackList = require("../models").BlackList;
+const Media = require("../models").Media;
 
+// exports.update = async (req, res) => {
+//     console.log(req.body);
 
+//     return res.status(401).json({"message":"update"});
+// };
 
-
-
-exports.update = async (req, res) => {
-    console.log(req.body);
-
-    return res.status(401).json({"message":"update"});
-};
 
 exports.avatar = async (req, res) => {
 
-    /* 
-        req.file = { 
-            fieldname, originalname, 
-            mimetype, size, bucket, key, location
-        }
-    */
-    console.log(`req.files ->> `, req.file);
-    // location key in req.file holds the s3 url for the image
-    let data = {}
-    if(req.file) {
-        data.image = req.file.location
+    if (!req.file) {
+        return res.status(400).json({"message":"Файл пуст"});
     }
 
-    // HERE IS YOUR LOGIC TO UPDATE THE DATA IN DATABASE
+    const media = await Media.create({
+        "model": 'User',
+        "modelId": req.user.id,
+        "type": req.file.mimetype,
+        "size": req.file.size,
+        "fieldname": req.file.fieldname,
+        "path": req.file.key
+    });
 
-    return res.status(401).json({"message":"avatar"});
+    return res.status(200).json({"message":"Файл сожранен"});
 };
 
 

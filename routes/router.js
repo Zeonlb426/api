@@ -432,7 +432,7 @@ router.post("/changepassword", auth, validationRequest.changepassword, authContr
 *         description: Что-то пошло не так.. гы гы
 *
 */
-router.patch("/update", auth, userController.update);
+// router.patch("/update", auth, userController.update);
 
 /**
 * @swagger
