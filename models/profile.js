@@ -26,11 +26,11 @@ module.exports = (sequelize, DataTypes) => {
         model: 'User',
         key: 'id'
       },
-      allowNull: false
+      allowNull: false,
+      unique: true
     },
     phone: {
       type: DataTypes.STRING(15),
-      unique: true
     },
     description: {
       type: DataTypes.STRING,

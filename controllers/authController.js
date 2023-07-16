@@ -9,6 +9,7 @@ const mailForgotTemplate = require("../templates/mailForgotTemplate");
 const User = require("../models").User;
 const BlackList = require("../models").BlackList;
 const Media = require("../models").Media;
+const {BanToken} = require("../utils/helper")
 
 // Получение данных для регистрации, отправка письма для подтверждения
 exports.register = async (req, res) => {
@@ -18,29 +19,23 @@ exports.register = async (req, res) => {
     password = await bcrypt.hash(password, 5);
 
     // Время жизни токена 10 мин, только для проверки письма
-    const token = jwt.sign(
-        { firstName, lastName, email, password },
-        process.env.TOKEN_KEY,
-        {
-            expiresIn: "600s",
-        }
-    );
+    const token = jwt.sign({ firstName, lastName, email, password }, process.env.TOKEN_KEY, { expiresIn: "600s" });
 
     const data = {
         userName: firstName + ' ' + lastName,
-        token: token
+        url: `${process.env.APP_URL}/api/v1/register/confirm?tkey=${token}`
     };
 
     const options = {
         from: `TESTING <${process.env.MAIL}>`,
         to: email,
         subject: "Регистрация аккаунта в приложении Instagram",
-        text: `Скопируйте адрес, вставьте в адресную строку вашего браузера и нажмите ввод - https://instagram.lern.dev/api/v1/confirm?tkey=${token}`,
+        text: `Скопируйте адрес, вставьте в адресную строку вашего браузера и нажмите ввод - ${data.url}`,
         html: mailConfirmTemplate(data),
     };
 
     try {
-        const resultSentMail = await sendMail(options);
+        await sendMail(options);
     } catch (err) {
         return res.status(418).json({ "message": "Ошибка отправки письма" });
     }
@@ -62,20 +57,7 @@ exports.confirm = async (req, res) => {
 
     const tokenId = uuidv4();
 
-    const token = jwt.sign(
-        {
-            id: user.id,
-            firstName,
-            lastName,
-            email,
-            avatar: user.avatar,
-            tokenId
-        },
-        process.env.TOKEN_KEY,
-        {
-            expiresIn: "60d",
-        }
-    );
+    const token = jwt.sign({userId: user.id, tokenId}, process.env.TOKEN_KEY, {expiresIn: "60d"});
 
     user.token = token;
 
@@ -89,66 +71,36 @@ exports.login = async (req, res) => {
 
     const user = await User.findOne({ where: { email } });
 
-    if (user && (await bcrypt.compare(password, user.password))) {
+    if (!user || !(await bcrypt.compare(password, user.password))) return res.status(401).json({ "message": "Логин или пароль указан не верно" });
 
-        const tokenId = uuidv4();
+    const tokenId = uuidv4();
 
-        const avatar = await Media.findOne({
-            where: {
-                model: 'User',
-                modelId: user.id,
-                fieldname: 'avatar'
-            }
-        })
+    const token = jwt.sign({userId: user.id, tokenId}, process.env.TOKEN_KEY, {expiresIn: "60d"});
+    user.token = token;
 
-
-        const pathToAvatar = avatar.getDataValue('path') ? `https://instagram.lern.dev/storage/${avatar.dataValues.path}` : '';
-
-        const token = jwt.sign(
-            {
-                id: user.id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                avatar: pathToAvatar,
-                tokenId
-            },
-            process.env.TOKEN_KEY,
-            {
-                expiresIn: "60d",
-            }
-        );
-        user.token = token;
-        user.avatar = pathToAvatar;
-
-        return res.status(200).json(user);
-    }
-
-    return res.status(401).json({ "message": "Логин или пароль указан не верно" });
+    return res.status(200).json(user);
 };
 
 // Выход из системы
 exports.logout = async (req, res) => {
 
-    const { id, tokenId, exp } = req.user;
-
-    const ban = await BlackList.create({
-        id: tokenId,
-        userId: id,
-        timeLive: exp
-    });
+    try {
+        await BanToken(req.tokenPayload);
+    } catch (error) {
+        return res.status(400).json({ "message": error.message });
+    }
 
     return res.status(200).json({ "message": "Выполнено успешно" });
 };
 
 // Отправка письма для восстановления пароля
-exports.forgot = async (req, res) => {
+exports.forgotpassword = async (req, res) => {
 
     const { email } = req.body;
 
     const user = await User.findOne({ 
         where: { email },
-        attributes: ['id', 'firstName', 'lastName', 'email', 'avatar', 'status']
+        attributes: ['id']
     });
 
     if (!user) return res.status(401).json({ "message": "Пользователь с таким почтовым адресом не найден" });
@@ -156,36 +108,23 @@ exports.forgot = async (req, res) => {
     const tokenId = uuidv4();
 
     // Время жизни токена 10 мин, только для проверки письма
-    const token = jwt.sign(
-        {   
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            avatar: user.avatar,
-            tokenId
-        },
-        process.env.TOKEN_KEY,
-        {
-            expiresIn: "600s",
-        }
-    );
+    const token = jwt.sign({userId: user.id, tokenId}, process.env.TOKEN_KEY, {expiresIn: "600s"});
 
     const data = {
         userName: user.firstName + ' ' + user.lastName,
-        token: token
+        url: `${process.env.APP_URL}/api/v1/changepassword?tkey=${token}`
     };
 
     const options = {
         from: `TESTING <${process.env.MAIL}>`,
         to: email,
         subject: "Восстановление пароля в приложении Instagram",
-        text: `Скопируйте адрес, вставьте в адресную строку вашего браузера и нажмите ввод - https://instagram.lern.dev/api/v1/changepassword?tkey=${data.token}`,
+        text: `Скопируйте адрес, вставьте в адресную строку вашего браузера и нажмите ввод - ${data.url}`,
         html: mailForgotTemplate(data),
     };
 
     try {
-        const resultSentMail = await sendMail(options);
+        await sendMail(options);
     } catch (err) {
         return res.status(418).json({ "message": "Ошибка отправки письма" });
     }
@@ -198,17 +137,13 @@ exports.changepassword = async (req, res) => {
 
     let { password } = req.body;
 
-    const { id, tokenId, exp } = req.user;
-
-    const ban = await BlackList.create({
-        id: tokenId,
-        userId: id,
-        timeLive: exp
-    });
-
-    password = await bcrypt.hash(password, 5);
-
-    await User.update({ password }, { where: { id } });
+    try {
+        await BanToken(req.tokenPayload);
+        password = await bcrypt.hash(password, 5);
+        await User.update({ password }, { where: { id: req.tokenPayload.userId } });
+    } catch (error) {
+        return res.status(400).json({ "message": error.message });
+    }
 
     return res.status(201).json({ "message": "Пароль изменён" });
 };
