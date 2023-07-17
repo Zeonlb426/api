@@ -1,10 +1,8 @@
 const express = require('express');
 const authController = require('../controllers/authController');
-const userController = require('../controllers/userController');
 const validationRequest = require('../middlewares/validationRequest');
 const checkHasUser = require('../middlewares/checkHasUser');
 const auth = require("../middlewares/auth");
-const uploadImage = require('../middlewares/uploadImage');
 const router = express.Router();
 
 /**
@@ -100,7 +98,7 @@ router.post("/register", validationRequest.register, checkHasUser, authControlle
 
 /**
 * @swagger
-* /confirm:
+* /register/confirm:
 *   get:
 *     summary: Завершение процедуры создания пользователя, запись данных в базу
 *     tags: [Auth]
@@ -145,7 +143,7 @@ router.post("/register", validationRequest.register, checkHasUser, authControlle
 *         description: Что-то пошло не так.. гы гы
 *
 */
-router.get("/confirm", validationRequest.confirm, checkHasUser, authController.confirm);
+router.get("/register/confirm", validationRequest.confirm, checkHasUser, authController.confirm);
 
 /**
 * @swagger
@@ -256,7 +254,7 @@ router.get("/logout", auth, authController.logout);
 
 /**
 * @swagger
-* /forgot:
+* /forgotpassword:
 *   post:
 *     summary: Восстановление забытого пароля
 *     tags: [Auth]
@@ -338,7 +336,7 @@ router.get("/logout", auth, authController.logout);
 *         description: Сервер здох.. гы гы
 *
 */
-router.post("/forgot", validationRequest.forgot, authController.forgot);
+router.post("/forgotpassword", validationRequest.forgotpassword, authController.forgotpassword);
 
 /**
 * @swagger

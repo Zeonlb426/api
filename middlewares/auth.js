@@ -32,9 +32,9 @@ const verifyToken = async (req, res, next) => {
 
     try {
 
-        req.user = await jwt.verify(token, process.env.TOKEN_KEY);
+        req.tokenPayload = await jwt.verify(token, process.env.TOKEN_KEY);
 
-        const ban = await BlackList.findOne({ where: { id: req.user.tokenId } });
+        const ban = await BlackList.findOne({ where: { id: req.tokenPayload.tokenId } });
 
         if (ban) throw new Error();
 

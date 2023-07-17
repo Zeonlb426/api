@@ -98,7 +98,7 @@ exports.avatar = async (req, res) => {
 
     const media = await Media.create({
         "model": 'User',
-        "modelId": req.user.id,
+        "modelId": req.tokenPayload.userId,
         "type": req.file.mimetype,
         "size": req.file.size,
         "fieldname": req.file.fieldname,
@@ -110,6 +110,15 @@ exports.avatar = async (req, res) => {
 
 
 exports.profile = async (req, res) => {
+
+    // const avatar = await Media.findOne({
+    //     where: {
+    //         model: 'User',
+    //         modelId: user.id,
+    //         fieldname: 'avatar'
+    //     }
+    // })
+    // const pathToAvatar = avatar.getDataValue('path') ? `https://instagram.lern.dev/storage/${avatar.dataValues.path}` : '';
 
     return res.status(200).json({
         firstName: req.user.firstName,

@@ -43,7 +43,7 @@ module.exports = (data) => {
               </div>
               <div class="email-body">
               <h1>Забыли пароль? Ну, бывает !</h1>
-              <p><a href="https://instagram.lern.dev/api/v1/changepassword?tkey=${data.token}">Для восстановления пароля, пожалуйста пройдите по ссылке</a></p>
+              <p><a href="${data.url}">Для восстановления пароля, пожалуйста пройдите по ссылке</a></p>
               </div>
               <div class="email-footer">
                 <p>Copyright © 2006–2023 ООО "Instagram Украина", 0-800-307-307</p>

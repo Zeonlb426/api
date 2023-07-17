@@ -184,7 +184,7 @@ exports.login = async (req, res, next) => {
  *       example:
  *         email: "example@mail.com"
  */
-exports.forgot = async (req, res, next) => {
+exports.forgotpassword = async (req, res, next) => {
 
     const schemaObject = checkSchema({
         email: {
@@ -323,9 +323,11 @@ exports.update = async (req, res, next) => {
 
     const schemaObject = checkSchema({
         firstName: {
-            exists: {
-                errorMessage: 'Отсутствует параметр',
-                bail: true
+            optional: {
+                options: {
+                    // values: 'undefined' | 'null' | 'falsy'
+                    values: 'undefined'
+                }
             },
             trim: true,
             escape: true,
@@ -340,9 +342,11 @@ exports.update = async (req, res, next) => {
 
         },
         lastName: {
-            exists: {
-                errorMessage: 'Отсутствует параметр',
-                bail: true
+            optional: {
+                options: {
+                    // values: 'undefined' | 'null' | 'falsy'
+                    values: 'undefined'
+                }
             },
             trim: true,
             escape: true,
@@ -354,78 +358,87 @@ exports.update = async (req, res, next) => {
                 options: { max: 30 },
                 errorMessage: 'Имя не должно быть больше 30 символов',
             }
-
         },
         oldPassword: {
-            optional: {
-                options: {checkFalsy: true}
-            },
             isLength: {
+                if: (value, { req }) => value !== undefined || req.body.newPassword !== undefined,
                 options: { min: 5, max: 8 },
                 errorMessage: 'Пароль должен быть не меньше 5 и не больше 8 символов',
-            }
+            },
+            exists: {
+                if: (value, { req }) => req.body.newPassword !== undefined,
+                errorMessage: 'Поле должно быть заполнено',
+            },
         },
         newPassword: {
-            optional: {
-                options: {checkFalsy: true}
-            },
             isLength: {
+                if: (value, { req }) => value !== undefined || req.body.oldPassword !== undefined,
                 options: { min: 5, max: 8 },
                 errorMessage: 'Пароль должен быть не меньше 5 и не больше 8 символов',
-            }
+            },
+            exists: {
+                if: (value, { req }) => req.body.oldPassword !== undefined,
+                errorMessage: 'Поле должно быть заполнено',
+            },
+
         },
         phone: {
             optional: {
-                options: {checkFalsy: true}
-            },
-            isLength: {
-                options: { min: 10, max: 15 },
-                errorMessage: 'Телефон должен быть не меньше 10 и не больше 15 символов',
+                options: {
+                    // values: 'undefined' | 'null' | 'falsy'
+                    values: 'null'
+                }
             },
             matches: {
-                options: /^\+\d{10,15}$/i,
-                errorMessage: 'Телефон должен быть в формате +xxxxxxxxxxxx'
-            }
+                options: /^\+\d{10,15}$/,
+                errorMessage: 'Номер телефона должен быть от 10 до 15 символов и соответствовать +xxxxxxxxxxxx',
+            },
         },
         description: {
             optional: {
-                options: {checkFalsy: true}
+                options: {
+                    // values: 'undefined' | 'null' | 'falsy'
+                    values: 'null'
+                }
             },
             isLength: {
                 options: { max: 255 },
-                errorMessage: 'Описание должно быть не больше 255 символов',
+                errorMessage: 'Описание не должно превышать 255 символов',
             },
         },
         latitude: {
             optional: {
-                options: {checkFalsy: true}
+                options: {
+                    // values: 'undefined' | 'null' | 'falsy'
+                    values: 'null'
+                }
             },
             isFloat: {
-                options: { min: -90, max: 90 },
-                errorMessage: 'Должен быть в пределах -90.00000:90.00000 ',
+                options: { min: -90.00000, max: 90.00000 },
+                errorMessage: 'Широта должна быть числом в пределах -90.00000 до 90.00000',
             },
-            isNumeric: {
-                errorMessage: 'Должен быть числом',
-            }
         },
         longitude: {
             optional: {
-                options: {checkFalsy: true}
+                options: {
+                    // values: 'undefined' | 'null' | 'falsy'
+                    values: 'null'
+                }
             },
             isFloat: {
-                options: { min: -180, max: 180 },
-                errorMessage: 'Должен быть в пределах -180.00000:180.00000',
+                options: { min: -180.00000, max: 180.00000 },
+                errorMessage: 'Долгота должна быть числом в пределах -180.00000 до 180.00000',
             },
-            isNumeric: {
-                errorMessage: 'Должен быть числом',
-            }
         },
         commercial: {
             optional: {
-                options: {checkFalsy: true}
+                options: {
+                    // values: 'undefined' | 'null' | 'falsy'
+                    values: 'null'
+                }
             },
             isBoolean: {
-                errorMessage: 'Должен быть true или false',
+                errorMessage: 'Поле должно быть boolean',
             }
         }
     });
@@ -437,6 +450,4 @@ exports.update = async (req, res, next) => {
     if (errors.isEmpty()) return next();
 
     return res.status(400).json({ errors: errors.array() });
-   
-    
 }

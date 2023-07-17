@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       unique: true
     },
     phone: {
-      type: DataTypes.STRING(15)
+      type: DataTypes.STRING(15),
     },
     description: {
       type: DataTypes.STRING,
