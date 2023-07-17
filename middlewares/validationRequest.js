@@ -434,7 +434,7 @@ exports.update = async (req, res, next) => {
             optional: {
                 options: {
                     // values: 'undefined' | 'null' | 'falsy'
-                    values: 'null'
+                    values: 'undefined'
                 }
             },
             isBoolean: {

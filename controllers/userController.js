@@ -24,40 +24,32 @@ exports.update = async (req, res) => {
         commercial
     } = req.body;
 
-    const user = await User.findOne({ where: { id: req.user.id } });
+    const user = await User.findOne({ where: { id: req.tokenPayload.userId } });
 
     if (!user) return res.status(409).json({ "message": "Такой пользователь не существует" });
 
     const userUpdateData = {};
 
-    if (firstName !== user.firstName) {
+    if (firstName  && firstName !== user.firstName) {
         userUpdateData.firstName = firstName
     }
 
-    if (lastName !== user.lastName) {
+    if (lastName && lastName !== user.lastName) {
         userUpdateData.lastName = lastName
     }
 
-    if (
-        newPassword
-        && newPassword.length > 0
-        && oldPassword
-        && oldPassword.length > 0
-        ) {
-            const validPassword = await bcrypt.compare(oldPassword, user.password);
+    if (newPassword && oldPassword) {
 
-            if (validPassword) {
-                const password = await bcrypt.hash(newPassword, 5);
-                userUpdateData.password = password;
-            }
+        const validPassword = await bcrypt.compare(oldPassword, user.password);
+
+        if (validPassword) {
+            const password = await bcrypt.hash(newPassword, 5);
+            userUpdateData.password = password;
+        }
     }
 
     if (Object.keys(userUpdateData).length !== 0 ) {
-        await User.update(userUpdateData, {
-            where: {
-              id: req.user.id
-            }
-        });
+        await user.update(userUpdateData);
     }
 
     // Profile -------------------------------------
@@ -67,9 +59,9 @@ exports.update = async (req, res) => {
         modelProfile.set({
             phone,
             description,
-            latitude: latitude ? latitude : modelProfile.latitude,
-            longitude: longitude ? longitude : modelProfile.longitude,
-            commercial: !!commercial,
+            latitude,
+            longitude,
+            commercial,
         })
         await modelProfile.save();
     }else{
@@ -77,15 +69,13 @@ exports.update = async (req, res) => {
             userId: user.id,
             phone,
             description,
-            latitude: latitude ? latitude : null,
-            longitude: longitude ? longitude : null,
-            commercial: !!commercial,
+            latitude,
+            longitude,
+            commercial,
         });
-
         await newModelProfile.save();
     }
     
-
     return res.status(200).json({"message":"update"});
 };
 
