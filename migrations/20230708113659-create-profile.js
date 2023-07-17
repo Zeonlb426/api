@@ -17,11 +17,11 @@ module.exports = {
             },
             key: 'id',
         },
-        allowNull: false
+        allowNull: false,
+        unique: true
       },
       phone: {
         type: Sequelize.STRING(15),
-        unique: true
       },
       description: {
         type: Sequelize.STRING,

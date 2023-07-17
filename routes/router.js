@@ -390,8 +390,8 @@ router.post("/changepassword", auth, validationRequest.changepassword, authContr
 * tags:
 *   name: User
 *   description: Работа с данными пользователя
-* /update:
-*   patch:
+* /user/update:
+*   post:
 *     summary: Обновление данных пользователя
 *     tags: [User]
 *     security:
@@ -401,7 +401,7 @@ router.post("/changepassword", auth, validationRequest.changepassword, authContr
 *       content:
 *         application/json:
 *           schema:
-*             $ref: '#/components/schemas/changePasswordRequest'
+*             $ref: '#/components/schemas/updateRequest'
 *     responses:
 *       200:
 *         description: Ответ при удачной смене данных.
@@ -412,9 +412,9 @@ router.post("/changepassword", auth, validationRequest.changepassword, authContr
 *               properties:
 *                 message:
 *                   type: string
-*                   description: Пароль изменён
+*                   description: Даные обновлены
 *               example:
-*                 message: "Пароль изменён"
+*                 message: "Даные обновлены"
 *       401:
 *         description: Токен не действительный.
 *         content:
@@ -477,6 +477,7 @@ router.post("/user/update", auth, validationRequest.update, userController.updat
 *
 */
 router.post("/avatar", auth, uploadImage.single("avatar"), userController.avatar);
+
 
 router.get("/profile", auth, userController.profile);
 
