@@ -2,7 +2,7 @@ const express = require('express');
 const userController = require('../controllers/userController');
 const validationRequest = require('../middlewares/validationRequest');
 const auth = require("../middlewares/auth");
-const uploadImage = require('../middlewares/uploadImage');
+const { uploadImage } = require('../middlewares/uploadImage');
 const router = express.Router();
 
 /**
@@ -97,6 +97,9 @@ router.post("/user/update", auth, validationRequest.update, userController.updat
 *
 */
 router.post("/user/avatar", auth, uploadImage.single("avatar"), userController.avatar);
+
+
+router.delete("/user/avatar", auth, userController.deleteAvatar);
 
 /**
 * @swagger

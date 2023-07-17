@@ -264,9 +264,6 @@ exports.changepassword = async (req, res, next) => {
  *   schemas:
  *     updateRequest:
  *       type: object
- *       required:
- *         - firstName
- *         - lastName
  *       properties:
  *         firstName:
  *           type: string

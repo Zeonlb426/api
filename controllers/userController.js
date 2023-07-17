@@ -9,6 +9,7 @@ const User = require("../models").User;
 const BlackList = require("../models").BlackList;
 const Media = require("../models").Media;
 const Profile = require("../models").Profile;
+const { S3 } = require("@aws-sdk/client-s3");
 
 exports.update = async (req, res) => {
 
@@ -96,6 +97,37 @@ exports.avatar = async (req, res) => {
     });
 
     return res.status(200).json({"message":"Файл сожранен"});
+};
+
+
+exports.deleteAvatar = async (req, res) => {
+
+    const avatar = await Media.findOne({
+        where: {
+            model: 'User',
+            modelId: req.tokenPayload.userId,
+            fieldname: 'avatar'
+        }
+    });
+
+    if (!avatar) return res.status(409).json({ "message": "Файл не существует" });
+
+    const s3 = new S3({
+        endpoint: process.env.AWS_HOST,
+        region: process.env.AWS_REGION,
+        credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY,
+            secretAccessKey: process.env.AWS_SECRET_KEY,
+        },
+        sslEnabled: false,
+        forcePathStyle: true,
+    });
+
+    await s3.deleteObject({ Bucket: process.env.AWS_BUCKET, Key: avatar.path });
+
+    await avatar.destroy();
+
+    res.status(200).json({ "message": "Файл успешно удалён" });
 };
 
 

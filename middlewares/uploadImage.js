@@ -50,7 +50,7 @@ const sanitizeFile = (file, cb) => {
     }
 };
 
-const uploadImage = multer({
+exports.uploadImage = multer({
     storage: s3Storage,
     fileFilter: (req, file, callback) => {
         sanitizeFile(file, callback)
@@ -60,4 +60,7 @@ const uploadImage = multer({
     }
 });
 
-module.exports = uploadImage;
+// exports.deleteImage = async (req, res, next) => {
+//     // await s3.deleteObject({ Bucket: process.env.AWS_BUCKET, Key: filename }).promise();
+//     return next();
+// };
