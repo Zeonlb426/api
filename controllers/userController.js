@@ -123,29 +123,47 @@ exports.deleteAvatar = async (req, res) => {
         forcePathStyle: true,
     });
 
-    await s3.deleteObject({ Bucket: process.env.AWS_BUCKET, Key: avatar.path });
-
-    await avatar.destroy();
+    try {
+        await s3.deleteObject({ Bucket: process.env.AWS_BUCKET, Key: avatar.path });
+        await avatar.destroy();
+    } catch (error) {
+        res.status(400).json({ "message": error.message });
+    }
+    
 
     res.status(200).json({ "message": "Файл успешно удалён" });
 };
 
-
 exports.profile = async (req, res) => {
 
-    // const avatar = await Media.findOne({
-    //     where: {
-    //         model: 'User',
-    //         modelId: user.id,
-    //         fieldname: 'avatar'
-    //     }
-    // })
-    // const pathToAvatar = avatar.getDataValue('path') ? `https://instagram.lern.dev/storage/${avatar.dataValues.path}` : '';
+    const user = await User.findOne({ 
+        where: { id: req.tokenPayload.userId },
+        attributes: ['id', 'firstName', 'lastName', 'email'],
+        include: 'Profile'
+    });
+
+    if (!user) return res.status(404).json({"message":"Такого пользователя не существует"});
+
+    const avatar = await Media.findOne({
+        where: {
+            model: 'User',
+            modelId: user.id,
+            fieldname: 'avatar'
+        }
+    });
+
+    let pathToAvatar = '';
+    if (avatar) pathToAvatar = `https://instagram.lern.dev/storage/${avatar.path}`;
 
     return res.status(200).json({
-        firstName: req.user.firstName,
-        lastName: req.user.lastName,
-        email: req.user.email,
-        avatar: req.user.avatar
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        avatar: pathToAvatar,
+        phone: user.Profile.phone,
+        description: user.Profile.description,
+        latitude: user.Profile.latitude,
+        longitude: user.Profile.longitude,
+        commercial: user.Profile.commercial
     });
 };
