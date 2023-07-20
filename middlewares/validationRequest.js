@@ -448,3 +448,29 @@ exports.update = async (req, res, next) => {
 
     return res.status(400).json({ errors: errors.array() });
 }
+
+
+exports.post = async (req, res, next) => {
+    const schemaObject = checkSchema({
+        description: {
+            optional: {
+                options: {
+                    // values: 'undefined' | 'null' | 'falsy'
+                    values: 'null'
+                }
+            },
+            isLength: {
+                options: { max: 255 },
+                errorMessage: 'Описание не должно превышать 255 символов',
+            },
+        },
+    });
+
+    await schemaObject.run(req);
+
+    const errors = validationResult(req);
+
+    if (errors.isEmpty()) return next();
+
+    return res.status(400).json({ errors: errors.array() });
+}
