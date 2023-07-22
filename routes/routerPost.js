@@ -54,5 +54,7 @@ const router = express.Router();
 */
 router.post("/post/create", auth, uploadImage.array("gallery", 10), validationRequest.post, postController.postCreate);
 
+router.delete("/post/:postId", auth, postController.postDelete);
+
 
 module.exports = router
