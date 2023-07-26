@@ -15,7 +15,7 @@ const { S3 } = require("@aws-sdk/client-s3");
 exports.postCreate = async (req, res) => {
 
     if (req.files.length === 0) {
-        return res.status(400).json({"message":"Файлы отсутствуют"});
+        return res.status(400).json({ "message": "Файлы отсутствуют" });
     }
 
     const post = await Post.create({
@@ -34,21 +34,21 @@ exports.postCreate = async (req, res) => {
         });
     });
 
-    return res.status(200).json({"message": "Успех"});
+    return res.status(200).json({ "message": "Успех" });
 };
 
 exports.postDelete = async (req, res) => {
 
     const post = await Post.findOne({
         where: {
-            id: req.params.postId
+            id: req.postId
         },
         include: 'User'
     });
 
-    if (!post) return res.status(404).json({"message": "Такого поста не существует"});
+    if (!post) return res.status(404).json({ "message": "Такого поста не существует" });
 
-    if (post.User.id !== req.tokenPayload.userId) return res.status(403).json({"message": "Доступ запрещен"});
+    if (post.User.id !== req.tokenPayload.userId) return res.status(403).json({ "message": "Доступ запрещен" });
 
     const media = await Media.findAll({
         where: {
@@ -57,7 +57,7 @@ exports.postDelete = async (req, res) => {
         }
     })
 
-    if (media) {
+    if (media && media.length > 0) {
 
         const s3 = new S3({
             endpoint: process.env.AWS_HOST,
@@ -70,7 +70,7 @@ exports.postDelete = async (req, res) => {
             forcePathStyle: true,
         });
 
-        media.forEach( async (modelMedia) => {
+        media.forEach(async (modelMedia) => {
             try {
                 await s3.deleteObject({ Bucket: process.env.AWS_BUCKET, Key: modelMedia.path });
                 await modelMedia.destroy();
@@ -82,23 +82,19 @@ exports.postDelete = async (req, res) => {
 
     post.destroy();
 
-    return res.status(200).json({"message": "Успех"});
+    return res.status(200).json({ "message": "Успех" });
 };
 
 exports.postGetById = async (req, res) => {
 
-    if (!Number.isInteger(req.params.postId)) {
-        return res.status(404).json({"message": "Такого поста не существует"});
-    }
-
     const post = await Post.findOne({
         where: {
-            id: req.params.postId
+            id: req.postId
         },
         include: 'User'
     });
 
-    if (!post) return res.status(404).json({"message": "Такого поста не существует"});
+    if (!post) return res.status(404).json({ "message": "Такого поста не существует" });
 
     const media = await Media.findAll({
         where: {
@@ -109,9 +105,9 @@ exports.postGetById = async (req, res) => {
 
     let arrayPathToImages = [];
 
-    if (media) {
+    if (media && media.length > 0) {
         let arrayPathToImages = [];
-        media.forEach( async (modelMedia) => {
+        media.forEach(async (modelMedia) => {
             arrayPathToImages.push(`${process.env.APP_URL}/storage/${modelMedia.path}`)
         });
     }
@@ -131,21 +127,21 @@ exports.postGetById = async (req, res) => {
 
 exports.postGetAll = async (req, res) => {
 
-    let offset = req.query.offset ? req.query.offset : 0
-    let limit = req.query.limit ? req.query.limit : 20
+    const { offset, limit } = req.paginate;
+
+    const APP_URL = process.env.APP_URL;
 
     const posts = await Post.findAndCountAll({
         offset: offset,
         limit: limit,
-        include: 'User' 
+        include: 'User'
     });
 
-    if (!posts) return res.status(404).json({"message": "Постов пока не существует"});
+    if (!posts) return res.status(404).json({ "message": "Постов пока не существует" });
 
+    let repositoryPosts = [];
 
-    let responseArray = [];
-
-    posts.rows.forEach( async (post) => {
+    for (const post of posts.rows) {
 
         let arrayPathToImages = [];
 
@@ -157,13 +153,13 @@ exports.postGetAll = async (req, res) => {
             }
         });
 
-        if (!gallery) return;
+        if (gallery.length === 0) continue;
 
         gallery.forEach((modelMedia) => {
-            arrayPathToImages.push(`${process.env.APP_URL}/storage/${modelMedia.path}`)
+            arrayPathToImages.push(`${APP_URL}/storage/${modelMedia.path}`)
         });
 
-        responseArray.push({
+        repositoryPosts.push({
             id: post.id,
             description: post.description,
             createdAt: post.createdAt,
@@ -174,9 +170,10 @@ exports.postGetAll = async (req, res) => {
                 lastName: post.User.lastName
             }
         });
-    })
+        
+    }
 
-    return res.status(200).json(responseArray);
+    return res.status(200).json(repositoryPosts);
 };
 
 
