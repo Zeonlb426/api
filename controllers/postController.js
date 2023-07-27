@@ -153,6 +153,20 @@ exports.postGetAll = async (req, res) => {
             }
         });
 
+        const avatar = await Media.findOne({
+            where: {
+                model: 'User',
+                modelId: post.User.id,
+                fieldname: 'avatar'
+            }
+        });
+
+        let urlToAvatar = '';
+
+        if (avatar) {
+            urlToAvatar = `${APP_URL}/storage/${avatar.path}`
+        }
+
         if (gallery.length === 0) continue;
 
         gallery.forEach((modelMedia) => {
@@ -167,13 +181,18 @@ exports.postGetAll = async (req, res) => {
             user: {
                 id: post.User.id,
                 firstName: post.User.firstName,
-                lastName: post.User.lastName
+                lastName: post.User.lastName,
+                avatar: urlToAvatar
             }
         });
-        
     }
 
-    return res.status(200).json(repositoryPosts);
+    const response = {
+        total: posts.count,
+        posts: repositoryPosts
+    }
+
+    return res.status(200).json(response);
 };
 
 
