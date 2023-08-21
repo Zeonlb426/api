@@ -23,7 +23,7 @@ exports.register = async (req, res) => {
 
     const data = {
         userName: firstName + ' ' + lastName,
-        url: `${process.env.APP_URL}/api/v1/register/confirm?tkey=${token}`
+        url: `${process.env.APP_URL}/api/register?tkey=${token}`
     };
 
     const options = {
