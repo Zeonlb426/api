@@ -132,6 +132,9 @@ exports.postGetAll = async (req, res) => {
     const APP_URL = process.env.APP_URL;
 
     const posts = await Post.findAndCountAll({
+        order: [
+            ['updatedAt', 'DESC']
+        ],
         offset: offset,
         limit: limit,
         include: 'User'

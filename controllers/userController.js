@@ -160,10 +160,10 @@ exports.profile = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         avatar: pathToAvatar,
-        phone: user.Profile.phone,
-        description: user.Profile.description,
-        latitude: user.Profile.latitude,
-        longitude: user.Profile.longitude,
-        commercial: user.Profile.commercial
+        phone: user.Profile?.phone ? user.Profile?.phone : '',
+        description: user.Profile?.description ? user.Profile?.description : '',
+        latitude: user.Profile?.latitude ? user.Profile?.latitude : '',
+        longitude: user.Profile?.longitude ? user.Profile?.longitude : '',
+        commercial: user.Profile?.commercial ? user.Profile?.commercial : false
     });
 };

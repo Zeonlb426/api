@@ -104,7 +104,7 @@ router.delete("/user/avatar", auth, userController.deleteAvatar);
 /**
 * @swagger
 * /user/profile:
-*   post:
+*   get:
 *     summary: Завершение процедуры смены пароля
 *     tags: [User]
 *     security:

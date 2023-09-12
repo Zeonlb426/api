@@ -72,6 +72,20 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ where: { email } });
 
     if (!user || !(await bcrypt.compare(password, user.password))) return res.status(401).json({ "message": "Логин или пароль указан не верно" });
+    
+    //-----------------------------------------
+    const avatar = await Media.findOne({
+        where: {
+            model: 'User',
+            modelId: user.id,
+            fieldname: 'avatar'
+        }
+    });
+
+    let pathToAvatar = '';
+    if (avatar) pathToAvatar = `https://instagram.lern.dev/storage/${avatar.path}`;
+    user.avatar = pathToAvatar;
+    //-----------------------------------------
 
     const tokenId = uuidv4();
 
